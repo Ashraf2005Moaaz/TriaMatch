@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriaMatch - Research Coordinator Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        app: {
+                            bg: '#f8fafc',
+                            card: '#ffffff',
+                            border: '#e2e8f0',
+                            text: '#1e293b',
+                            muted: '#64748b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 50%, #f0f9ff 100%);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .nav-link.active {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 600;
+        }
+        .nav-link.active i {
+            color: #0284c7;
+        }
+    </style>
+</head>
+<body class="bg-app-bg min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-app-border sticky top-0 z-30 px-4 lg:px-8 py-3 flex items-center justify-between shadow-xs">
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-3 w-64 shrink-0">
+            <button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-500 hover:text-slate-700">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="relative flex items-center justify-center cursor-pointer" onclick="switchTab('home')">
+                <div class="bg-gradient-to-tr from-teal-600 to-cyan-500 text-white p-2.5 rounded-xl flex items-center justify-center shadow-xs">
+                    <i class="fa-solid fa-stethoscope text-xl"></i>
+                </div>
+                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+                </span>
+            </div>
+            <div class="cursor-pointer" onclick="switchTab('home')">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold tracking-tight text-teal-800">Tria</span>
+                    <span class="text-xl font-bold tracking-tight text-cyan-600">Match</span>
+                </div>
+                <p class="text-[10px] text-slate-500 font-medium tracking-wide">Right Patients. Faster Trials.</p>
+            </div>
+        </div>
+
+        <!-- Global Search Bar -->
+        <div class="hidden md:flex flex-1 max-w-xl mx-8">
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="global-search" placeholder="Search by patient ID, trial name, or disease..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-slate-700 placeholder-slate-400">
+            </div>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="flex items-center space-x-4">
+            <!-- Notifications -->
+            <button class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors" title="Notifications" onclick="showToast('You have 3 unread recruitment alerts', 'info')">
+                <i class="fa-regular fa-bell text-lg"></i>
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+            </button>
+
+            <!-- User Profile Avatar & Badge -->
+            <div class="flex items-center space-x-3 pl-3 border-l border-slate-200 cursor-pointer group" onclick="switchTab('settings')">
+                <div class="w-10 h-10 rounded-full bg-teal-800 text-white font-semibold text-sm flex items-center justify-center shadow-xs ring-2 ring-teal-100">
+                    MT
+                </div>
+                <div class="hidden sm:block text-left">
+                    <div class="flex items-center space-x-1">
+                        <span class="text-sm font-semibold text-slate-800 group-hover:text-teal-700 transition-colors">Mariam Tarek</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
+                    </div>
+                    <p class="text-xs text-slate-500 font-normal">Research Coordinator</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Wrapper -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 bg-white border-r border-app-border flex-shrink-0 flex flex-col justify-between hidden lg:flex py-6 px-4 z-20 absolute lg:relative inset-y-0 left-0 shadow-lg lg:shadow-none transition-all duration-200">
+            <div class="space-y-1">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all active">
+                    <i class="fa-solid fa-house text-slate-400 text-base w-5"></i>
+                    <span>Home</span>
+                </button>
+                <button onclick="switchTab('patients')" id="nav-patients" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-regular fa-user text-slate-400 text-base w-5"></i>
+                    <span>Patients</span>
+                </button>
+                <button onclick="switchTab('trials')" id="nav-trials" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-regular fa-file-lines text-slate-400 text-base w-5"></i>
+                    <span>Clinical Trials</span>
+                </button>
+                <button onclick="switchTab('matches')" id="nav-matches" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-link text-slate-400 text-base w-5"></i>
+                    <span class="flex-1 text-left">Matches</span>
+                    <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-0.5 rounded-full">12</span>
+                </button>
+                <button onclick="switchTab('reports')" id="nav-reports" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-chart-simple text-slate-400 text-base w-5"></i>
+                    <span>Reports</span>
+                </button>
+                <button onclick="switchTab('messages')" id="nav-messages" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-regular fa-envelope text-slate-400 text-base w-5"></i>
+                    <span class="flex-1 text-left">Messages</span>
+                    <span class="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+                </button>
+            </div>
+
+            <!-- Sidebar Footer Info -->
+            <div class="space-y-4 pt-6 border-t border-slate-100">
+                <div class="px-3">
+                    <p class="text-xs font-semibold text-teal-800 leading-relaxed">Better data.<br>More trials.<br>Greater impact.</p>
+                </div>
+                <button onclick="switchTab('settings')" id="nav-settings" class="nav-link w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-gear text-slate-400 text-base w-5"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Scroll Area -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
+
+            <!-- VIEW 1: HOME PAGE -->
+            <div id="view-home" class="tab-view space-y-6">
+                <!-- Hero Welcome Banner -->
+                <div class="hero-gradient rounded-2xl p-6 lg:p-8 relative overflow-hidden border border-sky-100 shadow-xs">
+                    <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 pointer-events-none hidden md:flex items-center justify-end pr-8">
+                        <svg width="340" height="180" viewBox="0 0 340 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="170" cy="90" r="40" fill="#0284c7" fill-opacity="0.2" stroke="#0284c7" stroke-width="2"/>
+                            <circle cx="170" cy="90" r="18" fill="#0d9488" />
+                            <circle cx="70" cy="40" r="20" fill="#0284c7" fill-opacity="0.15" stroke="#0284c7"/>
+                            <circle cx="270" cy="50" r="22" fill="#0284c7" fill-opacity="0.15" stroke="#0284c7"/>
+                            <circle cx="80" cy="140" r="25" fill="#0284c7" fill-opacity="0.15" stroke="#0284c7"/>
+                            <circle cx="260" cy="130" r="18" fill="#0284c7" fill-opacity="0.15" stroke="#0284c7"/>
+                            <line x1="170" y1="90" x2="70" y2="40" stroke="#0284c7" stroke-width="2" stroke-dasharray="4 4"/>
+                            <line x1="170" y1="90" x2="270" y2="50" stroke="#0284c7" stroke-width="2" stroke-dasharray="4 4"/>
+                            <line x1="170" y1="90" x2="80" y2="140" stroke="#0284c7" stroke-width="2" stroke-dasharray="4 4"/>
+                            <line x1="170" y1="90" x2="260" y2="130" stroke="#0284c7" stroke-width="2" stroke-dasharray="4 4"/>
+                        </svg>
+                    </div>
+
+                    <div class="relative z-10 max-w-xl">
+                        <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">Welcome back, Mariam</h1>
+                        <p class="text-sm lg:text-base text-slate-600 mt-1 mb-6 font-medium">Find the right patients. Accelerate your research.</p>
+
+                        <form onsubmit="handleHeroSearch(event)" class="relative flex items-center max-w-lg bg-white rounded-full p-1.5 shadow-md border border-slate-200/80">
+                            <span class="pl-3.5 pr-2 text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                            </span>
+                            <input type="text" id="hero-search-input" placeholder="Search for a patient or clinical trial..." class="w-full bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none pr-2">
+                            <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white rounded-full p-2.5 transition-colors flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Stats Overview Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div onclick="switchTab('patients')" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start space-x-4 hover:border-teal-300 transition-all cursor-pointer">
+                        <div class="p-3 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-user-group text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Patients</span>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-0.5">8,432</h3>
+                            <p class="text-xs font-medium text-emerald-600 mt-1 flex items-center">
+                                <span>+12% since last month</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('trials')" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start space-x-4 hover:border-indigo-300 transition-all cursor-pointer">
+                        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-regular fa-folder-open text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Active Trials</span>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-0.5">126</h3>
+                            <p class="text-xs font-medium text-emerald-600 mt-1 flex items-center">
+                                <span>+5% since last month</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('matches')" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start space-x-4 hover:border-sky-300 transition-all cursor-pointer">
+                        <div class="p-3 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-link text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Potential Matches</span>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-0.5">342</h3>
+                            <p class="text-xs font-medium text-emerald-600 mt-1 flex items-center">
+                                <span>+18% since last month</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('reports')" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start space-x-4 hover:border-amber-300 transition-all cursor-pointer">
+                        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-regular fa-clock text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Avg. Matching Time</span>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-0.5">2.3 min</h3>
+                            <p class="text-xs font-medium text-emerald-600 mt-1 flex items-center">
+                                <span>-65% since last month</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Grid Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Section: Recommended Clinical Trials -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between px-1">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-dna text-teal-600 text-lg"></i>
+                                <h2 class="text-lg font-bold text-slate-800">Recommended Clinical Trials</h2>
+                            </div>
+                            <button onclick="switchTab('trials')" class="text-xs font-semibold text-teal-700 hover:text-teal-800 flex items-center space-x-1 group">
+                                <span>View all</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-0.5 transition-transform"></i>
+                            </button>
+                        </div>
+
+                        <!-- Trial Item 1 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="p-3.5 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-lungs text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-800">Phase III – NSCLC Treatment Study</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Non-Small Cell Lung Cancer</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Age 18–75</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Stage II–IV</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">ECOG 0–1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-0 pt-3 sm:pt-0 border-slate-100 gap-3">
+                                    <span class="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100/80 flex items-center space-x-1">
+                                        <i class="fa-solid fa-user-group text-[10px]"></i>
+                                        <span>12 suitable patients</span>
+                                    </span>
+                                    <button onclick="openTrialModal('Phase III – NSCLC Treatment Study', 'Non-Small Cell Lung Cancer', '12', 'Stage II-IV, ECOG 0-1')" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center space-x-1.5 shadow-xs">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trial Item 2 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="p-3.5 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-ribbon text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-800">Phase II – HER2+ Breast Cancer</h3>
+                                        <p class="text-xs text-slate-500 font-medium">HER2 Positive Breast Cancer</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Age 18–70</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Stage I–III</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Previous treatment allowed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-0 pt-3 sm:pt-0 border-slate-100 gap-3">
+                                    <span class="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100/80 flex items-center space-x-1">
+                                        <i class="fa-solid fa-user-group text-[10px]"></i>
+                                        <span>8 suitable patients</span>
+                                    </span>
+                                    <button onclick="openTrialModal('Phase II – HER2+ Breast Cancer', 'HER2 Positive Breast Cancer', '8', 'Stage I-III, Prior Tx OK')" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center space-x-1.5 shadow-xs">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trial Item 3 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="p-3.5 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-droplet text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-800">Phase I – Diabetes Medication</h3>
+                                        <p class="text-xs text-slate-500 font-medium">Type 2 Diabetes</p>
+                                        <div class="flex flex-wrap gap-2 mt-3">
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">Age 40–75</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">HbA1c ≥ 7%</span>
+                                            <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-medium">BMI 25–40</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-0 pt-3 sm:pt-0 border-slate-100 gap-3">
+                                    <span class="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full border border-teal-100/80 flex items-center space-x-1">
+                                        <i class="fa-solid fa-user-group text-[10px]"></i>
+                                        <span>15 suitable patients</span>
+                                    </span>
+                                    <button onclick="openTrialModal('Phase I – Diabetes Medication', 'Type 2 Diabetes', '15', 'HbA1c >= 7%, BMI 25-40')" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center space-x-1.5 shadow-xs">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Section: Quick Actions & Activity -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <i class="fa-solid fa-bolt text-teal-600 text-base"></i>
+                                <h3 class="font-bold text-slate-800">Quick Actions</h3>
+                            </div>
+                            <div class="space-y-2.5">
+                                <button onclick="switchTab('patients')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-teal-50/60 hover:bg-teal-100/60 transition-colors group text-left">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2 bg-white text-teal-700 rounded-lg shadow-2xs">
+                                            <i class="fa-regular fa-user text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">Search Patients</h4>
+                                            <p class="text-[11px] text-slate-500">Find patients by condition or criteria</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-teal-700 group-hover:translate-x-0.5 transition-all"></i>
+                                </button>
+
+                                <button onclick="switchTab('trials')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-sky-50/60 hover:bg-sky-100/60 transition-colors group text-left">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2 bg-white text-sky-700 rounded-lg shadow-2xs">
+                                            <i class="fa-regular fa-file-lines text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">Browse Clinical Trials</h4>
+                                            <p class="text-[11px] text-slate-500">Explore available trials</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-sky-700 group-hover:translate-x-0.5 transition-all"></i>
+                                </button>
+
+                                <button onclick="switchTab('matches')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-indigo-50/60 hover:bg-indigo-100/60 transition-colors group text-left">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2 bg-white text-indigo-700 rounded-lg shadow-2xs">
+                                            <i class="fa-solid fa-link text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">View Matches</h4>
+                                            <p class="text-[11px] text-slate-500">See compatible patients for your trials</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-indigo-700 group-hover:translate-x-0.5 transition-all"></i>
+                                </button>
+
+                                <button onclick="switchTab('reports')" class="w-full flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group text-left">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2 bg-white text-slate-700 rounded-lg shadow-2xs">
+                                            <i class="fa-solid fa-chart-simple text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">Generate Report</h4>
+                                            <p class="text-[11px] text-slate-500">Download recruitment insights</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-right text-xs text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity List -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-regular fa-clock text-teal-600 text-base"></i>
+                                    <h3 class="font-bold text-slate-800">Recent Activity</h3>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="p-2 bg-teal-50 text-teal-700 rounded-lg shrink-0 mt-0.5">
+                                            <i class="fa-solid fa-code-merge text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800">New match found</p>
+                                            <p class="text-[11px] text-slate-500">12 patients match Trial #CT-4587</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-400 shrink-0">2h ago</span>
+                                </div>
+
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="p-2 bg-sky-50 text-sky-700 rounded-lg shrink-0 mt-0.5">
+                                            <i class="fa-regular fa-user text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800">Patient data updated</p>
+                                            <p class="text-[11px] text-slate-500">Patient #P-2034</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-400 shrink-0">4h ago</span>
+                                </div>
+
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="p-2 bg-indigo-50 text-indigo-700 rounded-lg shrink-0 mt-0.5">
+                                            <i class="fa-regular fa-folder-open text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800">New clinical trial added</p>
+                                            <p class="text-[11px] text-slate-500">Phase II – Melanoma Study</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-400 shrink-0">6h ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: PATIENTS PAGE -->
+            <div id="view-patients" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Patients Database</h1>
+                        <p class="text-sm text-slate-500">Browse and manage patient profiles for trial eligibility</p>
+                    </div>
+                    <button onclick="showToast('Add Patient Feature: Opened registration form', 'info')" class="bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-xs flex items-center space-x-2 transition-colors self-start sm:self-auto">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Register New Patient</span>
+                    </button>
+                </div>
+
+                <!-- Filters & Search -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="patient-search" onkeyup="filterPatients()" placeholder="Search patient name, ID, condition..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <select id="patient-status-filter" onchange="filterPatients()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Statuses</option>
+                            <option value="Eligible">Eligible</option>
+                            <option value="In Screening">In Screening</option>
+                            <option value="Enrolled">Enrolled</option>
+                        </select>
+                        <span class="text-xs text-slate-500 font-medium hidden sm:inline" id="patient-count-badge">Showing 5 patients</span>
+                    </div>
+                </div>
+
+                <!-- Patient Table Card -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse" id="patients-table">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="py-3.5 px-4">Patient Name</th>
+                                    <th class="py-3.5 px-4">ID</th>
+                                    <th class="py-3.5 px-4">Age / Gender</th>
+                                    <th class="py-3.5 px-4">Primary Condition</th>
+                                    <th class="py-3.5 px-4">Match Rating</th>
+                                    <th class="py-3.5 px-4">Status</th>
+                                    <th class="py-3.5 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3.5 px-4 font-semibold text-slate-800">Sarah Jenkins</td>
+                                    <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">#P-2034</td>
+                                    <td class="py-3.5 px-4 text-slate-600">54 / Female</td>
+                                    <td class="py-3.5 px-4 text-slate-700 font-medium">Non-Small Cell Lung Cancer</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-xs">96% Match</span>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-teal-50 text-teal-700 font-semibold rounded-full text-xs">Eligible</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <button onclick="showToast('Viewing record for Sarah Jenkins', 'info')" class="text-teal-700 hover:text-teal-900 font-medium text-xs px-2 py-1 rounded hover:bg-teal-50">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3.5 px-4 font-semibold text-slate-800">Michael Chen</td>
+                                    <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">#P-1892</td>
+                                    <td class="py-3.5 px-4 text-slate-600">62 / Male</td>
+                                    <td class="py-3.5 px-4 text-slate-700 font-medium">Type 2 Diabetes</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-xs">91% Match</span>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-full text-xs">In Screening</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <button onclick="showToast('Viewing record for Michael Chen', 'info')" class="text-teal-700 hover:text-teal-900 font-medium text-xs px-2 py-1 rounded hover:bg-teal-50">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3.5 px-4 font-semibold text-slate-800">Elena Rostova</td>
+                                    <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">#P-3310</td>
+                                    <td class="py-3.5 px-4 text-slate-600">48 / Female</td>
+                                    <td class="py-3.5 px-4 text-slate-700 font-medium">HER2+ Breast Cancer</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-xs">88% Match</span>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-sky-50 text-sky-700 font-semibold rounded-full text-xs">Enrolled</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <button onclick="showToast('Viewing record for Elena Rostova', 'info')" class="text-teal-700 hover:text-teal-900 font-medium text-xs px-2 py-1 rounded hover:bg-teal-50">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3.5 px-4 font-semibold text-slate-800">Robert Taylor</td>
+                                    <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">#P-4011</td>
+                                    <td class="py-3.5 px-4 text-slate-600">39 / Male</td>
+                                    <td class="py-3.5 px-4 text-slate-700 font-medium">Rheumatoid Arthritis</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg text-xs">79% Match</span>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-teal-50 text-teal-700 font-semibold rounded-full text-xs">Eligible</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <button onclick="showToast('Viewing record for Robert Taylor', 'info')" class="text-teal-700 hover:text-teal-900 font-medium text-xs px-2 py-1 rounded hover:bg-teal-50">View</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3.5 px-4 font-semibold text-slate-800">Amina Al-Mansoor</td>
+                                    <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">#P-5102</td>
+                                    <td class="py-3.5 px-4 text-slate-600">65 / Female</td>
+                                    <td class="py-3.5 px-4 text-slate-700 font-medium">Non-Small Cell Lung Cancer</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-xs">94% Match</span>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-1 bg-amber-50 text-amber-700 font-semibold rounded-full text-xs">In Screening</span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <button onclick="showToast('Viewing record for Amina Al-Mansoor', 'info')" class="text-teal-700 hover:text-teal-900 font-medium text-xs px-2 py-1 rounded hover:bg-teal-50">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: CLINICAL TRIALS PAGE -->
+            <div id="view-trials" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Active Clinical Trials</h1>
+                        <p class="text-sm text-slate-500">Directory of ongoing trials and recruiting cohorts</p>
+                    </div>
+                    <button onclick="showToast('Create Trial form initialized', 'info')" class="bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-xs flex items-center space-x-2 transition-colors self-start sm:self-auto">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Create New Trial</span>
+                    </button>
+                </div>
+
+                <!-- Trial Category Pills -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-2">
+                    <button class="px-4 py-2 rounded-xl bg-teal-700 text-white font-semibold text-xs shrink-0 shadow-xs">All Studies (126)</button>
+                    <button class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs shrink-0">Oncology (42)</button>
+                    <button class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs shrink-0">Endocrinology (18)</button>
+                    <button class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs shrink-0">Immunology (24)</button>
+                    <button class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs shrink-0">Cardiology (15)</button>
+                </div>
+
+                <!-- Trials Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-3 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-full">Phase III</span>
+                                <span class="text-xs text-slate-400 font-mono">CT-2026-NSCLC</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800">NSCLC Immunotherapy Treatment Study</h3>
+                            <p class="text-xs text-slate-500 mt-1">Evaluating novel checkpoint inhibitors for stage II-IV non-small cell lung cancer.</p>
+                            <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                                <div><span class="text-slate-400">Target Cohort:</span> <p class="font-semibold text-slate-700">120 Patients</p></div>
+                                <div><span class="text-slate-400">Enrolled:</span> <p class="font-semibold text-teal-700">84 Patients (70%)</p></div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
+                            <span class="text-xs text-emerald-600 font-semibold"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Actively Recruiting</span>
+                            <button onclick="openTrialModal('NSCLC Immunotherapy Treatment Study', 'Non-Small Cell Lung Cancer', '12', 'Phase III')" class="text-teal-700 hover:text-teal-800 font-bold text-xs">Details &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full">Phase II</span>
+                                <span class="text-xs text-slate-400 font-mono">CT-2026-HER2</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800">Targeted HER2+ Breast Cancer Inhibitor</h3>
+                            <p class="text-xs text-slate-500 mt-1">Safety and efficacy study for late-stage metastatic breast cancer therapy.</p>
+                            <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                                <div><span class="text-slate-400">Target Cohort:</span> <p class="font-semibold text-slate-700">60 Patients</p></div>
+                                <div><span class="text-slate-400">Enrolled:</span> <p class="font-semibold text-teal-700">45 Patients (75%)</p></div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
+                            <span class="text-xs text-emerald-600 font-semibold"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Actively Recruiting</span>
+                            <button onclick="openTrialModal('Targeted HER2+ Breast Cancer Inhibitor', 'Breast Cancer', '8', 'Phase II')" class="text-teal-700 hover:text-teal-800 font-bold text-xs">Details &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: MATCHES PAGE -->
+            <div id="view-matches" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">AI Patient-Trial Matches</h1>
+                        <p class="text-sm text-slate-500">Automated genomic & clinical criteria matching suggestions</p>
+                    </div>
+                    <button onclick="showToast('Re-analyzing all patient database records...', 'info')" class="bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-xs flex items-center space-x-2 transition-colors">
+                        <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                        <span>Run AI Matcher</span>
+                    </button>
+                </div>
+
+                <!-- Matches List -->
+                <div class="space-y-4" id="matches-container">
+                    <!-- Match Item 1 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center font-bold text-teal-700 text-lg shrink-0">
+                                96%
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="font-bold text-slate-800">Sarah Jenkins (#P-2034)</h3>
+                                    <i class="fa-solid fa-right-long text-slate-300 text-xs"></i>
+                                    <span class="text-xs font-semibold text-teal-800">Phase III - NSCLC Study</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">Matched criteria: EGFR Mutation positive, Age 54, ECOG Score 1, Prior chemotherapy history.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+                            <button onclick="approveMatch(this, 'Sarah Jenkins')" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs">Approve Match</button>
+                            <button onclick="rejectMatch(this)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-colors">Dismiss</button>
+                        </div>
+                    </div>
+
+                    <!-- Match Item 2 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-bold text-emerald-700 text-lg shrink-0">
+                                91%
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="font-bold text-slate-800">Michael Chen (#P-1892)</h3>
+                                    <i class="fa-solid fa-right-long text-slate-300 text-xs"></i>
+                                    <span class="text-xs font-semibold text-teal-800">Phase I - Diabetes Medication</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">Matched criteria: HbA1c 7.8%, BMI 28.4, Age 62, Non-smoker.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+                            <button onclick="approveMatch(this, 'Michael Chen')" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-xl transition-colors shadow-xs">Approve Match</button>
+                            <button onclick="rejectMatch(this)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-colors">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: REPORTS PAGE -->
+            <div id="view-reports" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Analytics & Recruitment Reports</h1>
+                        <p class="text-sm text-slate-500">Key metrics on trial enrollment and patient demographics</p>
+                    </div>
+                    <button onclick="showToast('Exporting PDF Analytics Report...', 'success')" class="bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-xs flex items-center space-x-2 transition-colors">
+                        <i class="fa-solid fa-download text-xs"></i>
+                        <span>Download Full PDF Report</span>
+                    </button>
+                </div>
+
+                <!-- Report Chart Placeholders Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+                        <h3 class="font-bold text-slate-800 text-sm mb-4">Monthly Patient Matches Growth</h3>
+                        <!-- Visual Mock Bar Chart -->
+                        <div class="h-48 flex items-end justify-between gap-2 pt-6 px-4">
+                            <div class="w-full bg-teal-100 rounded-t-lg h-[40%] hover:bg-teal-200 transition-all relative group">
+                                <span class="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">120</span>
+                            </div>
+                            <div class="w-full bg-teal-200 rounded-t-lg h-[55%] hover:bg-teal-300 transition-all relative group">
+                                <span class="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">180</span>
+                            </div>
+                            <div class="w-full bg-teal-300 rounded-t-lg h-[70%] hover:bg-teal-400 transition-all relative group">
+                                <span class="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">240</span>
+                            </div>
+                            <div class="w-full bg-teal-600 rounded-t-lg h-[95%] hover:bg-teal-700 transition-all relative group">
+                                <span class="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">342</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mt-2 px-2">
+                            <span>June</span><span>July</span><span>August</span><span>September</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+                        <h3 class="font-bold text-slate-800 text-sm mb-4">Trial Distribution by Specialty</h3>
+                        <div class="space-y-3 pt-2">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1 font-semibold">
+                                    <span class="text-slate-700">Oncology</span>
+                                    <span class="text-slate-500">42%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-teal-600 h-full rounded-full" style="width: 42%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1 font-semibold">
+                                    <span class="text-slate-700">Immunology</span>
+                                    <span class="text-slate-500">28%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-sky-500 h-full rounded-full" style="width: 28%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1 font-semibold">
+                                    <span class="text-slate-700">Endocrinology</span>
+                                    <span class="text-slate-500">18%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-indigo-500 h-full rounded-full" style="width: 18%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: MESSAGES PAGE -->
+            <div id="view-messages" class="tab-view hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden h-[calc(100vh-140px)] flex">
+                    <!-- Conversations List -->
+                    <div class="w-1/3 border-r border-slate-200/80 flex flex-col">
+                        <div class="p-4 border-b border-slate-100">
+                            <h2 class="font-bold text-slate-800">Messages</h2>
+                        </div>
+                        <div class="overflow-y-auto flex-1 divide-y divide-slate-100">
+                            <div class="p-4 hover:bg-slate-50 cursor-pointer bg-sky-50/50">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="text-xs font-bold text-slate-800">Dr. Aris Vance</h4>
+                                    <span class="text-[10px] text-slate-400">10:42 AM</span>
+                                </div>
+                                <p class="text-xs text-slate-500 truncate">Patient Sarah Jenkins consent form has been uploaded.</p>
+                            </div>
+                            <div class="p-4 hover:bg-slate-50 cursor-pointer">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="text-xs font-bold text-slate-800">Lab Coordinator</h4>
+                                    <span class="text-[10px] text-slate-400">Yesterday</span>
+                                </div>
+                                <p class="text-xs text-slate-500 truncate">Blood assay results ready for Phase III cohort.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Window -->
+                    <div class="flex-1 flex flex-col bg-slate-50/50">
+                        <div class="p-4 bg-white border-b border-slate-200/80 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center">AV</div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-800">Dr. Aris Vance</h3>
+                                    <p class="text-[10px] text-emerald-600">Online</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                            <div class="bg-white p-3 rounded-2xl max-w-sm text-xs text-slate-700 shadow-2xs border border-slate-100 self-start">
+                                Hi Mariam, patient Sarah Jenkins consent form has been uploaded for the NSCLC study.
+                            </div>
+                            <div class="bg-teal-700 text-white p-3 rounded-2xl max-w-sm text-xs shadow-2xs self-end ml-auto">
+                                Thanks Dr. Vance! I will review the eligibility criteria now.
+                            </div>
+                        </div>
+                        <form onsubmit="sendMessage(event)" class="p-3 bg-white border-t border-slate-200/80 flex gap-2">
+                            <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-colors">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 7: SETTINGS PAGE -->
+            <div id="view-settings" class="tab-view hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Account & Preferences</h1>
+                    <p class="text-sm text-slate-500">Manage coordinator profile and system notifications</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 max-w-2xl">
+                    <form onsubmit="saveSettings(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                            <input type="text" value="Mariam Tarek" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+                            <input type="email" value="mariam.tarek@triamatch.org" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Role Title</label>
+                            <input type="text" value="Research Coordinator" disabled class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-500">
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800">Email Match Alerts</h4>
+                                <p class="text-[11px] text-slate-500">Receive instant alerts when AI matches new eligible patients</p>
+                            </div>
+                            <input type="checkbox" checked class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
+                        </div>
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-xs transition-colors">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Trial Details Modal -->
+    <div id="trial-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <span class="px-2.5 py-1 bg-teal-50 text-teal-700 text-xs font-bold rounded-full" id="modal-phase">Phase III</span>
+                <button onclick="closeTrialModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800" id="modal-title">Trial Title</h2>
+            <p class="text-xs text-slate-500 mt-1" id="modal-disease">Disease category</p>
+            
+            <div class="my-4 p-4 bg-slate-50 rounded-xl space-y-2 text-xs">
+                <div class="flex justify-between"><span class="text-slate-500">Criteria:</span><span class="font-medium text-slate-700" id="modal-criteria">Age 18-75</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Suitable Matches:</span><span class="font-bold text-teal-700" id="modal-patients">12 Patients</span></div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeTrialModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">Close</button>
+                <button onclick="closeTrialModal(); switchTab('matches')" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-xl">View Matching Patients</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Toast Notification Component -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-3 translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-teal-400"></i>
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <script>
+        // Tab Navigation SPA Logic
+        function switchTab(tabId) {
+            // Hide all tab views
+            document.querySelectorAll('.tab-view').forEach(view => {
+                view.classList.add('hidden');
+            });
+
+            // Show selected view
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) {
+                targetView.classList.remove('hidden');
+            }
+
+            // Update sidebar active link styles
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Auto-close mobile drawer if open
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('hidden') && window.innerWidth < 1024) {
+                sidebar.classList.add('hidden');
+            }
+        }
+
+        // Search Patient Table Filter
+        function filterPatients() {
+            const input = document.getElementById('patient-search').value.toLowerCase();
+            const status = document.getElementById('patient-status-filter').value;
+            const rows = document.querySelectorAll('#patients-table tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const rowStatus = row.querySelector('td:nth-child(6)').innerText.trim();
+
+                const matchesSearch = text.includes(input);
+                const matchesStatus = (status === 'all' || rowStatus === status);
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('patient-count-badge').innerText = `Showing ${visibleCount} patients`;
+        }
+
+        // Hero Global Search submit
+        function handleHeroSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('hero-search-input').value.trim();
+            if (query) {
+                switchTab('patients');
+                document.getElementById('patient-search').value = query;
+                filterPatients();
+                showToast(`Searched for "${query}" across patient records`, 'info');
+            }
+        }
+
+        // Interactive Modal Openers
+        function openTrialModal(title, disease, count, criteria) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-disease').innerText = disease;
+            document.getElementById('modal-patients').innerText = `${count} Patients`;
+            document.getElementById('modal-criteria').innerText = criteria;
+            document.getElementById('trial-modal').classList.remove('hidden');
+        }
+
+        function closeTrialModal() {
+            document.getElementById('trial-modal').classList.add('hidden');
+        }
+
+        // Matches Actions
+        function approveMatch(btn, patientName) {
+            btn.disabled = true;
+            btn.classList.add('bg-emerald-600');
+            btn.innerText = 'Approved ✓';
+            showToast(`Approved match for ${patientName}`, 'success');
+        }
+
+        function rejectMatch(btn) {
+            const card = btn.closest('.bg-white');
+            card.style.opacity = '0.5';
+            btn.disabled = true;
+            showToast('Match dismissed', 'info');
+        }
+
+        // Chat Send Action
+        function sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                const container = document.getElementById('chat-messages');
+                const newMsg = document.createElement('div');
+                newMsg.className = "bg-teal-700 text-white p-3 rounded-2xl max-w-sm text-xs shadow-2xs self-end ml-auto";
+                newMsg.innerText = message;
+                container.appendChild(newMsg);
+                input.value = '';
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // Settings Form Submit
+        function saveSettings(e) {
+            e.preventDefault();
+            showToast('Settings saved successfully!', 'success');
+        }
+
+        // Toast Helper
+        let toastTimeout;
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMessage.innerText = message;
+            
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-teal-400";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Toggle Mobile Sidebar Drawer
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
